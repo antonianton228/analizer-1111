@@ -2,7 +2,7 @@ import sys
 import math
 
 from PyQt5 import uic  # Импортируем uic
-from PyQt5.QtWidgets import QApplication, QMainWindow, QDialog
+from PyQt5.QtWidgets import QApplication, QMainWindow, QDialog, QSpinBox,QComboBox
 import requests
 import sqlite3
 
@@ -13,7 +13,6 @@ cur = bd.cursor()
 res = cur.execute('''
 SELECT id, title from plants
 ''').fetchall()
-print(res)
 a = list(map(lambda x: x[1], res))
 
 class Ui_MyDialog(QDialog):
@@ -23,7 +22,12 @@ class Ui_MyDialog(QDialog):
         self.pushButton.clicked.connect(self.run)
 
     def run(self):
-        pass
+        if self.lineEdit.text() != "":
+            cur.execute(f'''
+            INSERT INTO plants(title,pH,temprrature,vlagnost) VALUES("{self.lineEdit.text()}",{self.doubleSpinBox_2.value()},{self.spinBox.value()},{self.doubleSpinBox.value()})
+            ''')
+            bd.commit()
+            self.close()
 
 class MyWidget(QMainWindow):
     def __init__(self):
@@ -38,6 +42,13 @@ class MyWidget(QMainWindow):
         dlg = Ui_MyDialog()
         dlg.exec()
 
+        res = cur.execute('''
+        SELECT id, title from plants
+        ''').fetchall()
+        self.comboBox.clear()
+        a = list(map(lambda x: x[1], res))
+        self.comboBox.insertItems(0, a)
+
     def run(self):
         self.jsonin = requests.get('http://172.20.10.3/helloWorld').json()
         print(self.jsonin)
@@ -46,24 +57,26 @@ SELECT temprrature, vlagnost from plants
 WHERE id = {self.comboBox.currentIndex() + 1}
 ''').fetchall()[0]
 
+        try:
+            self.text = ''
+            if int(self.jsonin["Humidity"]) - 50 > vl:
+                self.text += f'слишком влажно, осушите на {round(((int(self.jsonin["Humidity"]) - vl) / 1023)*100, 2)}%'
+            elif int(self.jsonin["Humidity"]) + 50 < vl:
+                self.text += f'слишком сухо, увлажните на {round(((vl - int(self.jsonin["Humidity"])) / 1023) * 100, 2)}%'
+            else:
+                self.text += "Влажность в норме"
 
-        self.text = ''
-        if int(self.jsonin["Humidity"]) - 50 > vl:
-            self.text += f'слишком влажно, осушите на {round(((int(self.jsonin["Humidity"]) - vl) / 1023)*100, 2)}%'
-        elif int(self.jsonin["Humidity"]) + 50 < vl:
-            self.text += f'слишком сухо, увлажните на {round(((vl - int(self.jsonin["Humidity"])) / 1023) * 100, 2)}%'
-        else:
-            self.text += "Влажность в норме"
+            self.text += '\n'
+            if float(self.jsonin["Temperature"]) - 2.5 > tm:
+                self.text += f'слишком тепло, остудите на {round((float(self.jsonin["Temperature"]) - tm) , 2)}%'
+            elif float(self.jsonin["Temperature"]) + 2.5 < tm:
+                self.text += f'слишком холодно, увеличте на {round((tm - float(self.jsonin["Temperature"])) , 2)}%'
+            else:
+                self.text += "Температура в норме"
 
-        self.text += '\n'
-        if float(self.jsonin["Temperature"]) - 2.5 > tm:
-            self.text += f'слишком тепло, остудите на {round((float(self.jsonin["Temperature"]) - tm) , 2)}%'
-        elif float(self.jsonin["Temperature"]) + 2.5 < tm:
-            self.text += f'слишком холодно, увеличте на {round((tm - float(self.jsonin["Temperature"])) , 2)}%'
-        else:
-            self.text += "Температура в норме"
-
-        self.textEdit.setText(self.text)
+            self.textEdit.setText(self.text)
+        except Exception as d:
+            print(d)
 
 
 
