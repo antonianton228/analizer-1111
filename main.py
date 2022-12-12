@@ -50,7 +50,7 @@ class MyWidget(QMainWindow): # создаем класс
         self.comboBox.insertItems(0, a)
 
     def run(self):
-        self.jsonin = requests.get('http://172.20.10.3/helloWorld').json()#джейсон который получен с сервера
+        self.jsonin = requests.get('http://172.20.10.4/helloWorld').json()#джейсон который получен с сервера
         print(self.jsonin)
         tm, vl = cur.execute(f'''
 SELECT temprrature, vlagnost from plants
