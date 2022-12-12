@@ -11,8 +11,7 @@ constexpr auto pinSensor = A0;
 OneWire oneWire(SensorDataPin); //подключаем датчик влажности к библиотеке 6
  
 DallasTemperature sensors(&oneWire);// в экземпляр класса библиотеке 7 передаем экземпляр класс библеотеки 6, тем самым подключая температуру
- 
-const char* ssid = "iPhone (Лилия)";
+const char* ssid = "iPhone (2)";
 const char* password = "12345678";
  
 ESP8266WebServer server(80);// создаем сервер который распологается на локальном IP адресе в парту 80
