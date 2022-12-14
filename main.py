@@ -1,9 +1,9 @@
 import sys#библеотека отвечает за системные функции, кнопа , окно и тд
 import math
 
-from PyQt5 import uic  # Импортируем библиотеку uic, это наши интерфейсы 
+import requests
+from PyQt5 import uic  # Импортируем библиотеку uic, это наши интерфейсы
 from PyQt5.QtWidgets import QApplication, QMainWindow, QDialog, QSpinBox,QComboBox#импотируем все классы виджетов, виджеты это мой текст
-import requests#импортирум библ для общения  с нашим сервер
 import sqlite3
 
 from PyQt5.uic.properties import QtCore
@@ -54,8 +54,9 @@ class MyWidget(QMainWindow): # создаем класс
         print(self.jsonin)
         tm, vl = cur.execute(f'''
 SELECT temprrature, vlagnost from plants
-WHERE id = {self.comboBox.currentIndex() + 1}
+WHERE title = "{self.comboBox.currentText()}"
 ''').fetchall()[0]# мы обращаемся к базе данных и получаем показатели почвы выбранного растения
+
 
         try:
             self.text = ''
